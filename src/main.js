@@ -1,24 +1,58 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
+import "./style.css";
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
 
-setupCounter(document.querySelector('#counter'))
+
+const apiPersonagem = async () => {
+    const res = await fetch("https://rickandmortyapi.com/api/character/1,2,3");
+    const data = await res.json();
+    return data;
+};
+
+function generateProductHTML(personagem) {
+        return personagem.map((p) => (`
+            <div class="item" data-id="${p.id}">
+              <div class="item__group">
+                <img src="${p.image}" alt="${p.name}" class="sticker" />
+                <h3>${p.name}</h3>
+              </div>
+              <div class="item__group">
+                <div class="quantity-control">
+                  <button type="button" class="quantity-btn decrease">-</button>
+                  <span class="quantity-value" aria-live="polite">${p.quantity || 0}</span>
+                  <button type="button" class="quantity-btn increase">+</button>
+                </div>
+                <button type="button" class="delete-btn" id="add-to-cart">
+                  &times;
+                </button>
+              </div>
+            </div> 
+    `)).join("");
+}
+
+async function main() {
+    const personagem = await apiPersonagem();
+
+    const container = document.getElementById("products");
+    container.innerHTML = generateProductHTML(personagem);
+
+    const btnsIncrease = document.querySelectorAll(".increase");
+    const btnsDecrease = document.querySelectorAll(".decrease");
+    const quantityValues = document.querySelectorAll(".quantity-value");
+
+    btnsIncrease.forEach((btn, index) => {
+        btn.addEventListener("click", () => {
+            quantityValues[index].textContent = parseInt(quantityValues[index].textContent) + 1;
+            localStorage.setItem(quantityValues[index].textContent, `{
+                quantity: ${quantityValues[index].textContent},
+            }`);
+        });
+    });
+
+    btnsDecrease.forEach((btn, index) => {
+        btn.addEventListener("click", () => {
+            quantityValues[index].textContent = Math.max(0, parseInt(quantityValues[index].textContent) - 1);
+        });
+    });
+}
+
+main();
