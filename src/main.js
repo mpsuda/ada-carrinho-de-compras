@@ -18,7 +18,7 @@ function generateProductHTML(personagem) {
               <div class="item__group">
                 <div class="quantity-control">
                   <button type="button" class="quantity-btn decrease">-</button>
-                  <span class="quantity-value" aria-live="polite">${p.quantity || 0}</span>
+                  <span class="quantity-value" aria-live="polite">${p.quantity || getLocalStorage(p.id).quantity}</span>
                   <button type="button" class="quantity-btn increase">+</button>
                 </div>
                 <button type="button" class="delete-btn" id="add-to-cart">
@@ -27,6 +27,17 @@ function generateProductHTML(personagem) {
               </div>
             </div> 
     `)).join("");
+}
+
+function getLocalStorage(id) {
+    const data = localStorage.getItem(id);
+    return data ? JSON.parse(data) : { quantity: 0 };
+}
+
+function setQuantityInLocalStorage(index, id, clean = false) {
+    index == 0 || clean ? localStorage.removeItem(id) : localStorage.setItem(id, JSON.stringify({
+        quantity: index,
+    }));
 }
 
 async function main() {
@@ -38,21 +49,32 @@ async function main() {
     const btnsIncrease = document.querySelectorAll(".increase");
     const btnsDecrease = document.querySelectorAll(".decrease");
     const quantityValues = document.querySelectorAll(".quantity-value");
+    const btnDelete = document.querySelectorAll(".delete-btn");
 
     btnsIncrease.forEach((btn, index) => {
         btn.addEventListener("click", () => {
             quantityValues[index].textContent = parseInt(quantityValues[index].textContent) + 1;
-            localStorage.setItem(quantityValues[index].textContent, `{
-                quantity: ${quantityValues[index].textContent},
-            }`);
+            const id = btn.parentElement.parentElement.parentElement.dataset.id;
+            setQuantityInLocalStorage(quantityValues[index].textContent, id);
         });
     });
 
     btnsDecrease.forEach((btn, index) => {
         btn.addEventListener("click", () => {
             quantityValues[index].textContent = Math.max(0, parseInt(quantityValues[index].textContent) - 1);
+            const id = btn.parentElement.parentElement.parentElement.dataset.id;
+            setQuantityInLocalStorage(quantityValues[index].textContent, id);
         });
     });
+
+    btnDelete.forEach((btn, index) => {
+        btn.addEventListener("click", () => {
+            quantityValues[index].textContent = 0;
+            const id = btn.parentElement.parentElement.dataset.id;
+            setQuantityInLocalStorage(quantityValues[index].textContent, id, true);
+        });
+    });
+
 }
 
 main();
