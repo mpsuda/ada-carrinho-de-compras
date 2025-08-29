@@ -90,31 +90,27 @@ function updateCartTotal() {
     cartContainer.innerHTML = '';
     
     let totalQuantity = 0;
-    let cartProducts = [];
     
     productItems.forEach(item => {
         const id = item.dataset.id;
         const name = item.querySelector("h3").textContent;
         const image = item.querySelector("img").src;
         const quantity = parseInt(item.querySelector(".quantity-value").textContent) || 0;
+    
         if (quantity > 0) {
-            cartProducts.push({ id, name, image, quantity });
             totalQuantity += quantity;
-        }
-    });
-
-    personagem.forEach(p => {
-        cartContainer.innerHTML += `
-            <div class="item">
-                <div class="item__group">
-                    <img src="${p.image}" alt="${p.name}" class="image" />
-                    <h3>${p.name}</h3>
-            </div>
-            <div class="item__group">
-                    <output class="quantity-value">${p.quantity}</output>
+            cartContainer.innerHTML += `
+                <div class="item">
+                    <div class="item__group">
+                        <img src="${image}" alt="${name}" class="image" />
+                        <h3>${name}</h3>
+                    </div>
+                    <div class="item__group">
+                        <output class="quantity-value">${quantity}</output>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        }
     });
 
     cartTotal.textContent = totalQuantity;
@@ -134,11 +130,6 @@ async function main() {
     const cartCheckout = document.getElementById("cart_checkout");
     const cartTotal = document.getElementById("cart_total");
 
-   //if (cartTotal.innerText > 0) {
-   //    cartCheckout.disabled = false;
-   //    cartTotal.textContent = `${cartTotal.innerText}`;
-   //}
-
     cartCheckout.addEventListener("click", () => {
          localStorage.clear();
          cartTotal.textContent = "0";
@@ -148,5 +139,12 @@ async function main() {
          updateCartTotal();
     });
 }
+
+let personagem = [];
+let productItems = [];
+window.addEventListener("load", () => {
+    personagem = document.querySelectorAll("#products .item");
+    productItems = Array.from(personagem);
+});
 
 main();
