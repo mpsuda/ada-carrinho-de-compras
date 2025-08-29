@@ -1,7 +1,5 @@
 import "./style.css";
 
-
-
 const apiPersonagem = async () => {
     const res = await fetch("https://rickandmortyapi.com/api/character/1,2,3");
     const data = await res.json();
@@ -12,7 +10,7 @@ async function buildCharacterData() {
     const personagem = await apiPersonagem();
     personagem.forEach(p => {
         const localData = getLocalStorage(p.id);
-        p.quantity = localData.quantity;
+        p.quantity = localData.quantity || 0;
     });
     return personagem;
 }
@@ -60,6 +58,7 @@ function initializeQuantityButtons() {
             quantityValues[index].textContent = parseInt(quantityValues[index].textContent) + 1;
             const id = btn.parentElement.parentElement.parentElement.dataset.id;
             setQuantityInLocalStorage(quantityValues[index].textContent, id);
+            updateCartTotal();
         });
     });
 
@@ -68,18 +67,59 @@ function initializeQuantityButtons() {
             quantityValues[index].textContent = Math.max(0, parseInt(quantityValues[index].textContent) - 1);
             const id = btn.parentElement.parentElement.parentElement.dataset.id;
             setQuantityInLocalStorage(quantityValues[index].textContent, id);
+            updateCartTotal();
         });
     });
 
-    btnDelete.forEach((btn, index) => {
+btnDelete.forEach((btn, index) => {
         btn.addEventListener("click", () => {
             quantityValues[index].textContent = 0;
             const id = btn.parentElement.parentElement.dataset.id;
             setQuantityInLocalStorage(quantityValues[index].textContent, id, true);
+            updateCartTotal();
         });
     });
 }
 
+function updateCartTotal() {
+    const quantityValues = document.querySelectorAll("#products .item")
+    const cartContainer = document.getElementById("cart_products");
+    const cartTotal = document.getElementById("cart_total");
+    const cartCheckout = document.getElementById("cart_checkout");
+
+    cartContainer.innerHTML = '';
+    
+    let totalQuantity = 0;
+    let cartProducts = [];
+    
+    productItems.forEach(item => {
+        const id = item.dataset.id;
+        const name = item.querySelector("h3").textContent;
+        const image = item.querySelector("img").src;
+        const quantity = parseInt(item.querySelector(".quantity-value").textContent) || 0;
+        if (quantity > 0) {
+            cartProducts.push({ id, name, image, quantity });
+            totalQuantity += quantity;
+        }
+    });
+
+    personagem.forEach(p => {
+        cartContainer.innerHTML += `
+            <div class="item">
+                <div class="item__group">
+                    <img src="${p.image}" alt="${p.name}" class="image" />
+                    <h3>${p.name}</h3>
+            </div>
+            <div class="item__group">
+                    <output class="quantity-value">${p.quantity}</output>
+                </div>
+            </div>
+        `;
+    });
+
+    cartTotal.textContent = totalQuantity;
+    cartCheckout.disabled = totalQuantity === 0;
+}
 
 async function main() {
     const personagem = await buildCharacterData();
@@ -89,14 +129,15 @@ async function main() {
 
     initializeQuantityButtons();
 
+    updateCartTotal();
+
     const cartCheckout = document.getElementById("cart_checkout");
     const cartTotal = document.getElementById("cart_total");
 
-    
-   if (cartTotal.innerText > 0) {
-       cartCheckout.disabled = false;
-       cartTotal.textContent = `${cartTotal.innerText}`;
-   }
+   //if (cartTotal.innerText > 0) {
+   //    cartCheckout.disabled = false;
+   //    cartTotal.textContent = `${cartTotal.innerText}`;
+   //}
 
     cartCheckout.addEventListener("click", () => {
          localStorage.clear();
@@ -104,11 +145,8 @@ async function main() {
          cartCheckout.disabled = true;
          const quantityValues = document.querySelectorAll(".quantity-value");
          quantityValues.forEach((q) => q.textContent = "0");
+         updateCartTotal();
     });
 }
 
 main();
-
-
-
-
