@@ -104,11 +104,14 @@ function updateCartTotal(personagem) {
      }).join("");
      cartContainer.innerHTML = cartContainerw;
 
-     const total = personagem.reduce((acc, p) => (acc + Number(p.quantity)), 0);
+    const total = personagem.reduce((acc, p) => (acc + Number(p.quantity)), 0);
     cartTotal.textContent = total;
-     if (total > 0) {
-         cartCheckout.disabled = false;
-     } 
+    cartCheckout.disabled = false;
+    
+    if (total === 0) {
+         cartCheckout.disabled = true;
+    }
+
 }
 
 function resetCart() {
