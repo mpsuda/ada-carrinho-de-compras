@@ -16,7 +16,8 @@ async function buildCharacterData() {
 }
 
 function generateProductHTML(personagem) {
-        return personagem.map((p) => (`
+        const container = document.getElementById("products");
+        container.innerHTML = personagem.map((p) => (`
             <div class="item" data-id="${p.id}">
               <div class="item__group">
                 <img src="${p.image}" alt="${p.name}" class="sticker" />
@@ -123,9 +124,8 @@ function resetCart() {
 
 async function main() {
     const personagem = await buildCharacterData();
-
-    const container = document.getElementById("products");
-    container.innerHTML = generateProductHTML(personagem);
+    
+    generateProductHTML(personagem);
 
     initializeQuantityButtons();
 
