@@ -116,13 +116,17 @@ function updateCartTotal(personagem) {
 
 function resetCart() {
     const cartCheckout = document.getElementById("cart_checkout");
-    const cartTotal = document.getElementById("cart_total");    cartCheckout.addEventListener("click", () => {
+    const cartContainer = document.getElementById("cart_products");
+    const cartTotal = document.getElementById("cart_total");   
+    cartCheckout.addEventListener("click", () => {
         localStorage.clear();
         cartTotal.textContent = "0";
         cartCheckout.disabled = true;
         const quantityValues = document.querySelectorAll(".quantity-value");
         quantityValues.forEach((q) => q.textContent = "0");
+        cartContainer.innerHTML = "";
     });
+    
 }
 
 async function main() {
