@@ -58,7 +58,7 @@ function initializeQuantityButtons() {
             quantityValues[index].textContent = parseInt(quantityValues[index].textContent) + 1;
             const id = btn.parentElement.parentElement.parentElement.dataset.id;
             setQuantityInLocalStorage(quantityValues[index].textContent, id);
-            updateCartTotal();
+            main();
         });
     });
 
@@ -67,54 +67,58 @@ function initializeQuantityButtons() {
             quantityValues[index].textContent = Math.max(0, parseInt(quantityValues[index].textContent) - 1);
             const id = btn.parentElement.parentElement.parentElement.dataset.id;
             setQuantityInLocalStorage(quantityValues[index].textContent, id);
-            updateCartTotal();
+            main();
         });
     });
 
-btnDelete.forEach((btn, index) => {
+    btnDelete.forEach((btn, index) => {
         btn.addEventListener("click", () => {
             quantityValues[index].textContent = 0;
             const id = btn.parentElement.parentElement.dataset.id;
             setQuantityInLocalStorage(quantityValues[index].textContent, id, true);
-            updateCartTotal();
+            main();
         });
     });
 }
 
-function updateCartTotal() {
-    const quantityValues = document.querySelectorAll("#products .item")
+function updateCartTotal(personagem) {
     const cartContainer = document.getElementById("cart_products");
     const cartTotal = document.getElementById("cart_total");
     const cartCheckout = document.getElementById("cart_checkout");
 
-    cartContainer.innerHTML = '';
-    
-    let totalQuantity = 0;
-    
-    productItems.forEach(item => {
-        const id = item.dataset.id;
-        const name = item.querySelector("h3").textContent;
-        const image = item.querySelector("img").src;
-        const quantity = parseInt(item.querySelector(".quantity-value").textContent) || 0;
-    
-        if (quantity > 0) {
-            totalQuantity += quantity;
-            cartContainer.innerHTML += `
-                <div class="item">
-                    <div class="item__group">
-                        <img src="${image}" alt="${name}" class="image" />
-                        <h3>${name}</h3>
-                    </div>
-                    <div class="item__group">
-                        <output class="quantity-value">${quantity}</output>
-                    </div>
-                </div>
-            `;
-        }
-    });
+     const cartContainerw = personagem.map((p) => {
+         if (p.quantity > 0) {
+             return `
+          <div class="item">
+             <div class="item__group">
+                 <img src="${p.image}" alt="${p.name}" class="image" />
+                 <h3>${p.name}</h3>
+             </div>
+             <div class="item__group">
+                 <output class="quantity-value">${p.quantity}</output>
+             </div>
+         </div>
+         `
+         }
+     }).join("");
+     cartContainer.innerHTML = cartContainerw;
 
-    cartTotal.textContent = totalQuantity;
-    cartCheckout.disabled = totalQuantity === 0;
+     const total = personagem.reduce((acc, p) => (acc + Number(p.quantity)), 0);
+    cartTotal.textContent = total;
+     if (total > 0) {
+         cartCheckout.disabled = false;
+     } 
+}
+
+function resetCart() {
+    const cartCheckout = document.getElementById("cart_checkout");
+    const cartTotal = document.getElementById("cart_total");    cartCheckout.addEventListener("click", () => {
+        localStorage.clear();
+        cartTotal.textContent = "0";
+        cartCheckout.disabled = true;
+        const quantityValues = document.querySelectorAll(".quantity-value");
+        quantityValues.forEach((q) => q.textContent = "0");
+    });
 }
 
 async function main() {
@@ -125,26 +129,10 @@ async function main() {
 
     initializeQuantityButtons();
 
-    updateCartTotal();
+    updateCartTotal(personagem);
 
-    const cartCheckout = document.getElementById("cart_checkout");
-    const cartTotal = document.getElementById("cart_total");
-
-    cartCheckout.addEventListener("click", () => {
-         localStorage.clear();
-         cartTotal.textContent = "0";
-         cartCheckout.disabled = true;
-         const quantityValues = document.querySelectorAll(".quantity-value");
-         quantityValues.forEach((q) => q.textContent = "0");
-         updateCartTotal();
-    });
+    resetCart();
 }
 
-let personagem = [];
-let productItems = [];
-window.addEventListener("load", () => {
-    personagem = document.querySelectorAll("#products .item");
-    productItems = Array.from(personagem);
-});
 
 main();
